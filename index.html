@@ -7,11 +7,17 @@
 
 <style>
 body {
-  font-family: Arial, sans-serif;
-  background: #0f172a;
+  font-family: system-ui;
+  background: linear-gradient(135deg, #0f172a, #020617);
   color: white;
   margin: 0;
   padding: 20px;
+}
+
+/* TITLE */
+h1 {
+  font-size: 28px;
+  margin-bottom: 20px;
 }
 
 /* NAV */
@@ -29,19 +35,26 @@ body {
   cursor: pointer;
 }
 
-/* MAIN */
+/* LAYOUT */
 .container {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: 20px;
-  flex-wrap: wrap;
 }
 
-.left, .right {
-  flex: 1;
-  min-width: 300px;
+/* CARD */
+.card {
+  background: #1e293b;
+  border-radius: 16px;
+  padding: 15px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.4);
 }
 
-/* TEXTAREA */
+/* TEXT AREA */
+.overlay {
+  position: relative;
+}
+
 textarea {
   width: 100%;
   height: 300px;
@@ -54,14 +67,11 @@ textarea {
   position: relative;
 }
 
-/* OVERLAY */
-.overlay {
-  position: relative;
-  background: #1e293b;
-  border-radius: 10px;
-  overflow: hidden;
+textarea:focus {
+  outline: none;
 }
 
+/* CORRECTION BEHIND */
 .correction {
   position: absolute;
   top: 0;
@@ -80,15 +90,31 @@ button.main {
   border: none;
   color: white;
   cursor: pointer;
-  border-radius: 6px;
+  border-radius: 8px;
+  transition: 0.2s;
+}
+
+button.main:hover {
+  background: #2563eb;
 }
 
 /* ROULETTE */
 #wheel {
   margin-top: 20px;
-  padding: 15px;
-  background: #1e293b;
-  border-radius: 10px;
+}
+
+/* RESULT */
+#result {
+  font-size: 18px;
+  margin-top: 10px;
+  color: #38bdf8;
+}
+
+/* MOBILE */
+@media (max-width: 800px) {
+  .container {
+    grid-template-columns: 1fr;
+  }
 }
 </style>
 </head>
@@ -105,29 +131,29 @@ button.main {
 <div class="container">
 
   <!-- LEFT -->
-  <div class="left overlay">
+  <div class="card overlay">
     <div class="correction" id="correctionText"></div>
 
-    <textarea id="userText" placeholder="Écris ici..."></textarea>
+    <textarea id="userText" placeholder="Écris ton analyse ici..."></textarea>
 
-    <button class="main" onclick="saveText()">💾 Save</button>
-    <button class="main" onclick="clearText()">🗑 Reset</button>
+    <button class="main" onclick="saveText()">💾 Sauvegarder</button>
+    <button class="main" onclick="clearText()">🗑 Réinitialiser</button>
   </div>
 
   <!-- RIGHT -->
-  <div class="right">
+  <div class="card">
     <h3>Correction finale</h3>
     <div id="finalCorrection">Termine pour voir la correction</div>
 
-    <button class="main" onclick="finishText()">✅ Finish Text</button>
+    <button class="main" onclick="finishText()">✅ Terminer</button>
   </div>
 
 </div>
 
 <!-- ROULETTE -->
-<div id="wheel">
+<div id="wheel" class="card">
   <h3>🎯 Choix aléatoire</h3>
-  <button class="main" onclick="spin()">🎲 Lancer la roue</button>
+  <button class="main" onclick="spin()">🎲 Lancer</button>
   <p id="result"></p>
 </div>
 
