@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Revision App</title>
+
+<style>
+body {
+  font-family: Arial, sans-serif;
+  background: #0f172a;
+  color: white;
+  margin: 0;
+  padding: 20px;
+}
+
+/* NAV */
+.nav {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.nav button {
+  background: none;
+  border: none;
+  color: #3b82f6;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+/* MAIN */
+.container {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.left, .right {
+  flex: 1;
+  min-width: 300px;
+}
+
+/* TEXTAREA */
+textarea {
+  width: 100%;
+  height: 300px;
+  background: transparent;
+  color: white;
+  border: none;
+  padding: 10px;
+  font-size: 14px;
+  z-index: 2;
+  position: relative;
+}
+
+/* OVERLAY */
+.overlay {
+  position: relative;
+  background: #1e293b;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.correction {
+  position: absolute;
+  top: 0;
+  left: 0;
+  opacity: 0.2;
+  padding: 10px;
+  white-space: pre-wrap;
+  pointer-events: none;
+}
+
+/* BUTTONS */
+button.main {
+  margin-top: 10px;
+  padding: 10px;
+  background: #3b82f6;
+  border: none;
+  color: white;
+  cursor: pointer;
+  border-radius: 6px;
+}
+
+/* ROULETTE */
+#wheel {
+  margin-top: 20px;
+  padding: 15px;
+  background: #1e293b;
+  border-radius: 10px;
+}
+</style>
+</head>
+
+<body>
+
+<h1>📚 Revision App</h1>
+
+<div class="nav">
+  <button>⬅ Étape 1</button>
+  <button>Étape 3 ➡</button>
+</div>
+
+<div class="container">
+
+  <!-- LEFT -->
+  <div class="left overlay">
+    <div class="correction" id="correctionText"></div>
+
+    <textarea id="userText" placeholder="Écris ici..."></textarea>
+
+    <button class="main" onclick="saveText()">💾 Save</button>
+    <button class="main" onclick="clearText()">🗑 Reset</button>
+  </div>
+
+  <!-- RIGHT -->
+  <div class="right">
+    <h3>Correction finale</h3>
+    <div id="finalCorrection">Termine pour voir la correction</div>
+
+    <button class="main" onclick="finishText()">✅ Finish Text</button>
+  </div>
+
+</div>
+
+<!-- ROULETTE -->
+<div id="wheel">
+  <h3>🎯 Choix aléatoire</h3>
+  <button class="main" onclick="spin()">🎲 Lancer la roue</button>
+  <p id="result"></p>
+</div>
+
+<script>
+
+/* TEXTS */
+const texts = [
+  "Le Dormeur du Val",
+  "Les Tahitiens",
+  "Misanthrope",
+  "Lettres persanes"
+];
+
+/* CORRECTIONS */
+const corrections = {
+  "Les Tahitiens": "Correction complète des Tahitiens...",
+  "Misanthrope": "Correction complète du Misanthrope...",
+  "Le Dormeur du Val": "Correction complète du Dormeur du Val..."
+};
+
+/* SAVE */
+function saveText() {
+  localStorage.setItem("text", userText.value);
+}
+
+/* LOAD */
+window.onload = () => {
+  const saved = localStorage.getItem("text");
+  if (saved) userText.value = saved;
+};
+
+/* RESET */
+function clearText() {
+  userText.value = "";
+  localStorage.removeItem("text");
+}
+
+/* FINISH */
+function finishText() {
+  const current = result.innerText;
+  finalCorrection.innerText =
+    corrections[current] || "Pas de correction disponible";
+}
+
+/* ROULETTE */
+function spin() {
+  const random = texts[Math.floor(Math.random() * texts.length)];
+  result.innerText = random;
+
+  correctionText.innerText =
+    corrections[random] || "";
+}
+
+</script>
+
+</body>
+</html>
