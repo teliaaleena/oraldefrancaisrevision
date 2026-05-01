@@ -1,0 +1,951 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ma Bibliothèque — Révision Orale</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f0f13;
+    --bg2: #17171e;
+    --bg3: #1e1e28;
+    --card: #1a1a24;
+    --card-hover: #20202c;
+    --border: #2a2a38;
+    --border2: #333345;
+    --text: #e8e8f0;
+    --text2: #9090a8;
+    --text3: #5a5a72;
+    --accent: #5b6ef5;
+    --accent2: #7b8ef7;
+    --accent-bg: rgba(91,110,245,0.12);
+    --green: #22c55e;
+    --green-bg: rgba(34,197,94,0.12);
+    --highlight-bg: rgba(91,110,245,0.18);
+    --highlight-border: rgba(91,110,245,0.5);
+    --phrase-color: #7b8ef7;
+    --shadow: 0 4px 24px rgba(0,0,0,0.4);
+    --radius: 12px;
+    --radius-sm: 8px;
+  }
+  [data-theme="light"] {
+    --bg: #f4f4f8;
+    --bg2: #ebebf2;
+    --bg3: #e2e2ec;
+    --card: #ffffff;
+    --card-hover: #f8f8fc;
+    --border: #dddde8;
+    --border2: #c8c8d8;
+    --text: #1a1a2e;
+    --text2: #5a5a78;
+    --text3: #9090a8;
+    --accent: #5b6ef5;
+    --accent2: #4a5de8;
+    --accent-bg: rgba(91,110,245,0.08);
+    --green: #16a34a;
+    --green-bg: rgba(22,163,74,0.1);
+    --highlight-bg: rgba(91,110,245,0.1);
+    --highlight-border: rgba(91,110,245,0.35);
+    --phrase-color: #4a5de8;
+    --shadow: 0 4px 24px rgba(0,0,0,0.08);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Sora', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    transition: background 0.3s, color 0.3s;
+  }
+  /* ─── VIEWS ─── */
+  .view { display: none; min-height: 100vh; }
+  .view.active { display: block; }
+
+  /* ─── LIBRARY ─── */
+  #library { padding: 48px 40px; max-width: 1200px; margin: 0 auto; }
+  .lib-header { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 32px; gap: 16px; flex-wrap: wrap; }
+  .lib-title { display: flex; align-items: center; gap: 12px; }
+  .lib-title h1 { font-size: 2rem; font-weight: 700; color: var(--accent); }
+  .lib-title .icon { font-size: 1.5rem; }
+  .lib-subtitle { color: var(--text2); margin-top: 4px; font-size: 0.9rem; }
+  .lib-actions { display: flex; gap: 10px; align-items: center; }
+  .btn { display: inline-flex; align-items: center; gap: 6px; padding: 9px 18px; border-radius: var(--radius-sm); border: none; cursor: pointer; font-family: 'Sora', sans-serif; font-size: 0.85rem; font-weight: 600; transition: all 0.18s; }
+  .btn-primary { background: var(--accent); color: #fff; }
+  .btn-primary:hover { background: var(--accent2); transform: translateY(-1px); }
+  .btn-ghost { background: var(--bg3); color: var(--text2); border: 1px solid var(--border); }
+  .btn-ghost:hover { background: var(--border); color: var(--text); }
+  .btn-icon { padding: 8px 10px; }
+  .theme-btn { background: var(--bg3); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 8px 10px; cursor: pointer; font-size: 1rem; transition: all 0.18s; }
+  .theme-btn:hover { background: var(--border); }
+  .cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; }
+  .text-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 22px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .text-card:hover { background: var(--card-hover); border-color: var(--border2); transform: translateY(-2px); box-shadow: var(--shadow); }
+  .text-card h3 { font-size: 1rem; font-weight: 700; margin-bottom: 8px; line-height: 1.3; }
+  .text-card .preview { font-size: 0.8rem; color: var(--text2); line-height: 1.5; margin-bottom: 14px; font-style: italic; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+  .card-meta { display: flex; justify-content: space-between; align-items: center; font-size: 0.72rem; color: var(--text3); font-family: 'JetBrains Mono', monospace; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 10px; }
+  .progress-bar { height: 3px; background: var(--border); border-radius: 2px; overflow: hidden; margin-bottom: 12px; }
+  .progress-fill { height: 100%; background: var(--accent); border-radius: 2px; transition: width 0.3s; }
+  .card-open { color: var(--accent); font-size: 0.82rem; font-weight: 600; display: flex; align-items: center; gap: 5px; text-decoration: none; }
+  .empty-state { grid-column: 1/-1; text-align: center; padding: 80px 20px; color: var(--text3); }
+  .empty-state p { margin-top: 8px; font-size: 0.9rem; }
+
+  /* ─── MODAL ─── */
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); z-index: 100; align-items: center; justify-content: center; }
+  .modal-overlay.open { display: flex; }
+  .modal { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 28px; width: 90%; max-width: 520px; position: relative; }
+  .modal h2 { font-size: 1.1rem; font-weight: 700; margin-bottom: 6px; display: flex; align-items: center; gap: 8px; }
+  .modal p { color: var(--text2); font-size: 0.85rem; margin-bottom: 20px; }
+  .modal-close { position: absolute; top: 16px; right: 16px; background: none; border: none; color: var(--text3); font-size: 1.2rem; cursor: pointer; }
+  .modal-close:hover { color: var(--text); }
+  .roulette-box { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 40px; text-align: center; margin-bottom: 20px; min-height: 100px; display: flex; align-items: center; justify-content: center; }
+  .roulette-result { font-weight: 700; font-size: 1rem; }
+  .roulette-hint { color: var(--text3); font-size: 0.85rem; }
+  .modal-actions { display: flex; gap: 10px; justify-content: flex-end; }
+
+  /* ─── NEW TEXT FORM ─── */
+  #new-text { padding: 40px; max-width: 900px; margin: 0 auto; }
+  .page-back { display: flex; align-items: center; gap: 8px; color: var(--text2); font-size: 0.85rem; cursor: pointer; margin-bottom: 24px; font-weight: 600; }
+  .page-back:hover { color: var(--text); }
+  .page-title { font-size: 1.6rem; font-weight: 700; color: var(--accent); margin-bottom: 6px; }
+  .page-subtitle { color: var(--text2); font-size: 0.88rem; margin-bottom: 28px; }
+  .form-section { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 22px; margin-bottom: 16px; }
+  .form-label { font-size: 0.78rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: var(--text3); margin-bottom: 8px; display: block; }
+  .form-input { width: 100%; background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 10px 14px; color: var(--text); font-family: 'Sora', sans-serif; font-size: 0.9rem; outline: none; transition: border-color 0.2s; }
+  .form-input:focus { border-color: var(--accent); }
+  textarea.form-input { resize: vertical; min-height: 60px; line-height: 1.6; }
+  textarea.form-input.big { min-height: 280px; font-size: 0.85rem; font-family: 'JetBrains Mono', monospace; }
+  .info-box { background: var(--accent-bg); border: 1px solid var(--highlight-border); border-radius: var(--radius-sm); padding: 14px 16px; margin-bottom: 16px; font-size: 0.82rem; line-height: 1.6; color: var(--text2); }
+  .info-box code { background: var(--bg3); border-radius: 4px; padding: 1px 5px; font-family: 'JetBrains Mono', monospace; color: var(--accent2); font-size: 0.8rem; }
+  .stats-row { display: flex; gap: 16px; margin-bottom: 16px; }
+  .stat-badge { background: var(--bg3); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 8px 16px; font-size: 0.8rem; font-weight: 700; font-family: 'JetBrains Mono', monospace; }
+  .stat-badge span { color: var(--text3); font-weight: 400; margin-right: 4px; }
+  .form-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
+
+  /* ─── STUDY VIEW ─── */
+  #study { min-height: 100vh; display: none; flex-direction: column; }
+  #study.active { display: flex; flex-direction: column; }
+  .study-topbar { display: flex; align-items: center; gap: 16px; padding: 14px 32px; border-bottom: 1px solid var(--border); background: var(--bg2); flex-shrink: 0; flex-wrap: wrap; }
+  .study-back { background: none; border: none; color: var(--text2); cursor: pointer; font-size: 1.1rem; padding: 4px 8px; border-radius: 6px; }
+  .study-back:hover { background: var(--border); color: var(--text); }
+  .study-title-wrap h2 { font-size: 1rem; font-weight: 700; color: var(--accent); }
+  .study-title-wrap p { font-size: 0.75rem; color: var(--text3); font-family: 'JetBrains Mono', monospace; margin-top: 2px; }
+  .study-progress-wrap { flex: 1; display: flex; align-items: center; gap: 12px; min-width: 140px; }
+  .study-pct { font-size: 0.85rem; font-weight: 700; font-family: 'JetBrains Mono', monospace; color: var(--accent); }
+  .study-bar { flex: 1; height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
+  .study-bar-fill { height: 100%; background: var(--accent); border-radius: 3px; transition: width 0.4s; }
+  .topbar-actions { display: flex; gap: 8px; margin-left: auto; }
+  .topbar-btn { display: flex; align-items: center; gap: 6px; padding: 7px 14px; border-radius: var(--radius-sm); border: 1px solid var(--border); background: var(--bg3); color: var(--text2); font-family: 'Sora', sans-serif; font-size: 0.8rem; font-weight: 600; cursor: pointer; transition: all 0.18s; }
+  .topbar-btn:hover { background: var(--border); color: var(--text); }
+  .steps-nav { display: flex; padding: 0 32px; border-bottom: 1px solid var(--border); background: var(--bg2); flex-shrink: 0; }
+  .step-tab { display: flex; align-items: center; gap: 10px; padding: 14px 24px; cursor: pointer; border-bottom: 2px solid transparent; font-size: 0.85rem; transition: all 0.2s; color: var(--text3); flex-shrink: 0; }
+  .step-tab.active { border-color: var(--accent); color: var(--text); }
+  .step-tab.done { color: var(--green); }
+  .step-tab.locked { cursor: not-allowed; opacity: 0.5; }
+  .step-num { width: 22px; height: 22px; border-radius: 50%; border: 2px solid currentColor; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 700; flex-shrink: 0; }
+  .step-tab.done .step-num { background: var(--green); border-color: var(--green); color: #fff; }
+  .step-tab.active .step-num { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .step-info { display: flex; flex-direction: column; }
+  .step-label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.06em; opacity: 0.7; }
+  .step-name { font-weight: 700; font-size: 0.88rem; }
+  .step-content { flex: 1; overflow: auto; padding: 32px; max-width: 1100px; margin: 0 auto; width: 100%; }
+
+  /* ÉTAPE 1 */
+  .stage-hint { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 14px 18px; font-size: 0.85rem; color: var(--text2); margin-bottom: 24px; }
+  .fields-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+  .field-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; }
+  .field-card.full { grid-column: 1/-1; }
+  .field-icon { font-size: 1.1rem; margin-bottom: 8px; }
+  .field-title { font-weight: 700; font-size: 0.95rem; margin-bottom: 4px; }
+  .field-subtitle { font-size: 0.78rem; color: var(--text2); margin-bottom: 14px; }
+  .step-footer { display: flex; justify-content: space-between; align-items: center; padding: 16px 32px; border-top: 1px solid var(--border); background: var(--bg2); flex-shrink: 0; }
+  .step-footer-hint { font-size: 0.8rem; color: var(--text3); }
+
+  /* ÉTAPE 2 */
+  .phrases-layout { display: grid; grid-template-columns: 1fr 380px; gap: 20px; align-items: start; }
+  .passage-panel { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; line-height: 1.9; font-size: 0.9rem; }
+  .phrase-highlight { background: var(--highlight-bg); border-bottom: 2px solid var(--phrase-color); color: var(--phrase-color); border-radius: 3px 3px 0 0; cursor: pointer; padding: 0 2px; transition: background 0.15s; font-weight: 600; }
+  .phrase-highlight:hover { background: rgba(91,110,245,0.28); }
+  .phrase-highlight.active { background: rgba(91,110,245,0.3); box-shadow: 0 0 0 2px var(--accent); border-radius: 3px; }
+  .analysis-panel { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; position: sticky; top: 20px; }
+  .panel-nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+  .panel-nav-btns button { background: var(--bg3); border: 1px solid var(--border); border-radius: 6px; color: var(--text2); cursor: pointer; padding: 4px 10px; font-size: 0.85rem; }
+  .panel-nav-btns button:hover { background: var(--border); }
+  .panel-phrase-label { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: var(--text3); font-family: 'JetBrains Mono', monospace; }
+  .panel-phrase-text { font-size: 0.95rem; font-weight: 600; color: var(--accent); margin-bottom: 14px; font-style: italic; line-height: 1.5; }
+  .correction-label { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: var(--text3); margin-bottom: 6px; font-family: 'JetBrains Mono', monospace; }
+  .correction-text { font-size: 0.82rem; color: var(--text2); line-height: 1.6; background: var(--bg2); border-radius: var(--radius-sm); padding: 10px 12px; font-style: italic; }
+  .phantom-row { display: flex; align-items: center; justify-content: space-between; margin-top: 10px; margin-bottom: 10px; }
+  .toggle-wrap { display: flex; align-items: center; gap: 8px; font-size: 0.78rem; color: var(--text2); font-weight: 600; }
+  .toggle { position: relative; width: 36px; height: 20px; cursor: pointer; }
+  .toggle input { opacity: 0; width: 0; height: 0; }
+  .toggle-slider { position: absolute; inset: 0; background: var(--border2); border-radius: 20px; transition: 0.2s; }
+  .toggle-slider:before { content: ''; position: absolute; width: 14px; height: 14px; left: 3px; bottom: 3px; background: #fff; border-radius: 50%; transition: 0.2s; }
+  .toggle input:checked + .toggle-slider { background: var(--accent); }
+  .toggle input:checked + .toggle-slider:before { transform: translateX(16px); }
+  .masquer-btn { font-size: 0.75rem; color: var(--text3); background: none; border: none; cursor: pointer; font-family: 'Sora', sans-serif; display: flex; align-items: center; gap: 4px; }
+  .masquer-btn:hover { color: var(--text2); }
+  .analysis-input-area { margin-top: 12px; }
+  .analysis-typing { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 8px 12px; font-size: 0.82rem; color: var(--text3); font-style: italic; margin-bottom: 10px; min-height: 36px; }
+  .save-next-btn { width: 100%; padding: 10px; background: var(--accent); color: #fff; border: none; border-radius: var(--radius-sm); font-family: 'Sora', sans-serif; font-weight: 700; font-size: 0.88rem; cursor: pointer; transition: background 0.18s; }
+  .save-next-btn:hover { background: var(--accent2); }
+  .kbd-hint { font-size: 0.72rem; color: var(--text3); text-align: center; margin-top: 6px; }
+  kbd { background: var(--bg3); border: 1px solid var(--border2); border-radius: 4px; padding: 1px 5px; font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; }
+
+  /* ÉTAPE 3 */
+  .synthese-section { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 22px; margin-bottom: 16px; }
+  .synthese-section h3 { font-size: 1rem; font-weight: 700; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+  .synthese-field { margin-bottom: 14px; }
+  .synthese-field-label { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: var(--text3); margin-bottom: 5px; display: flex; justify-content: space-between; }
+  .vide-tag { color: var(--text3); font-weight: 400; font-style: italic; }
+  .filled-tag { color: var(--green); font-weight: 600; }
+
+  /* SIMULATION */
+  .sim-overlay { display: none; position: fixed; inset: 0; background: var(--bg); z-index: 200; flex-direction: column; overflow: auto; }
+  .sim-overlay.open { display: flex; }
+  .sim-header { display: flex; align-items: center; gap: 14px; padding: 16px 28px; border-bottom: 1px solid var(--border); background: var(--bg2); }
+  .sim-close { background: none; border: none; color: var(--text3); font-size: 1.3rem; cursor: pointer; margin-left: auto; }
+  .sim-close:hover { color: var(--text); }
+  .sim-title { font-weight: 700; font-size: 1rem; }
+  .sim-sub { font-size: 0.78rem; color: var(--text3); }
+  .sim-body { flex: 1; overflow: auto; }
+  .sim-timer-box { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 40px; text-align: center; margin: 24px; }
+  .sim-clock { font-size: 3.5rem; font-weight: 700; font-family: 'JetBrains Mono', monospace; letter-spacing: 0.05em; color: var(--text); margin-bottom: 20px; }
+  .sim-clock.warning { color: #f59e0b; }
+  .sim-clock.danger { color: #ef4444; }
+  .timer-progress { height: 4px; background: var(--border); border-radius: 2px; margin-bottom: 24px; overflow: hidden; }
+  .timer-progress-fill { height: 100%; background: var(--accent); border-radius: 2px; transition: width 1s linear; }
+  .sim-timer-btns { display: flex; gap: 12px; justify-content: center; margin-bottom: 20px; }
+  .sim-duration-btns { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
+  .dur-btn { background: var(--bg3); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 7px 16px; color: var(--text2); font-family: 'Sora', sans-serif; font-size: 0.82rem; font-weight: 600; cursor: pointer; transition: all 0.18s; }
+  .dur-btn.selected { background: var(--accent-bg); border-color: var(--accent); color: var(--accent); }
+  .sim-hint { font-size: 0.78rem; color: var(--text3); margin-top: 14px; }
+  .sim-text-box { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 28px; margin: 0 24px 24px; }
+  .sim-text-label { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: var(--text3); font-family: 'JetBrains Mono', monospace; margin-bottom: 16px; padding-bottom: 10px; border-bottom: 1px solid var(--border); }
+  .sim-passage { line-height: 1.9; font-size: 0.9rem; }
+
+  /* ─── SCROLLBAR ─── */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+
+  /* ─── ANIMATIONS ─── */
+  @keyframes fadeUp { from { opacity:0; transform: translateY(12px); } to { opacity:1; transform: translateY(0); } }
+  .fade-up { animation: fadeUp 0.3s ease forwards; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .spinning { animation: spin 0.5s linear infinite; }
+
+  /* ─── RESPONSIVE ─── */
+  @media (max-width: 700px) {
+    #library, #new-text { padding: 24px 16px; }
+    .fields-grid { grid-template-columns: 1fr; }
+    .phrases-layout { grid-template-columns: 1fr; }
+    .study-topbar { padding: 12px 16px; }
+    .steps-nav { overflow-x: auto; }
+    .step-content { padding: 16px; }
+    .step-footer { padding: 12px 16px; }
+    .sim-timer-box { margin: 16px; }
+    .sim-text-box { margin: 0 16px 16px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════ LIBRARY VIEW ═══════════════════════ -->
+<div id="library" class="view active">
+  <div class="lib-header">
+    <div>
+      <div class="lib-title">
+        <span class="icon">📚</span>
+        <h1>Ma bibliothèque</h1>
+      </div>
+      <p class="lib-subtitle">Tes passages, problématiques et plans d'oral — tout au même endroit.</p>
+    </div>
+    <div class="lib-actions">
+      <button class="btn btn-ghost" onclick="openRoulette()">🔀 Roulette</button>
+      <button class="btn btn-primary" onclick="showView('new-text')">＋ Nouveau texte</button>
+      <button class="theme-btn" id="theme-toggle" onclick="toggleTheme()" title="Changer le thème">🌙</button>
+    </div>
+  </div>
+  <div class="cards-grid" id="cards-grid">
+    <div class="empty-state" id="empty-state">
+      <div style="font-size:2.5rem">📝</div>
+      <p>Ajoute ton premier texte pour commencer à réviser !</p>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════ NEW TEXT VIEW ═══════════════════════ -->
+<div id="new-text" class="view">
+  <div style="max-width:900px;margin:0 auto;padding:40px 40px 80px;">
+    <div class="page-back" onclick="showView('library')">← Retour</div>
+    <h2 class="page-title" id="new-text-title">Modifier le texte</h2>
+    <p class="page-subtitle">Donne un titre à ton passage et entoure les phrases clés avec des [crochets].</p>
+
+    <div class="stats-row">
+      <div class="stat-badge"><span>MOTS</span><span id="word-count">0</span></div>
+      <div class="stat-badge"><span>PHRASES</span><span id="phrase-count">0</span></div>
+    </div>
+
+    <div class="form-section">
+      <label class="form-label">TITRE</label>
+      <input type="text" class="form-input" id="text-title-input" placeholder="Ex: LES TAHITIENS - Bougainville">
+    </div>
+
+    <div class="info-box">
+      Colle le passage ci-dessous. Utilise des <code>[crochets]</code> autour des phrases que tu veux analyser. Par exemple : <code>C'était le [meilleur des temps], c'était le [pire des temps]</code>.<br>
+      Tu peux aussi noter une correction modèle après une barre <code>|</code> : <code>[meilleur des temps | antithèse, hyperbole, registre épique]</code>
+    </div>
+
+    <div class="form-section">
+      <label class="form-label">PASSAGE</label>
+      <textarea class="form-input big" id="passage-input" placeholder="Colle ton texte ici avec [phrases clés | analyse modèle] entre crochets..." oninput="updateStats()"></textarea>
+    </div>
+
+    <div class="form-actions">
+      <button class="btn btn-ghost" onclick="showView('library')">Enregistrer dans la bibliothèque</button>
+      <button class="btn btn-primary" onclick="saveAndStudy()">Enregistrer et étudier →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════ STUDY VIEW ═══════════════════════ -->
+<div id="study" class="view">
+  <div class="study-topbar">
+    <button class="study-back" onclick="showView('library')">←</button>
+    <div class="study-title-wrap">
+      <h2 id="study-title-display">—</h2>
+      <p id="study-meta">0/0 phrases · 0/0 champs du plan · 0 mots écrits</p>
+    </div>
+    <div class="study-progress-wrap">
+      <span class="study-pct" id="study-pct">0%</span>
+      <div class="study-bar"><div class="study-bar-fill" id="study-bar-fill" style="width:0%"></div></div>
+    </div>
+    <div class="topbar-actions">
+      <button class="topbar-btn" onclick="checkOublis()">🔍 Vérifier les oublis</button>
+      <button class="topbar-btn" onclick="openSimulation()">🎙️ Simulation</button>
+      <button class="topbar-btn" onclick="exportText()">📋 Exporter</button>
+    </div>
+  </div>
+
+  <div class="steps-nav">
+    <div class="step-tab active" id="tab-1" onclick="gotoStep(1)">
+      <div class="step-num">1</div>
+      <div class="step-info">
+        <span class="step-label">Étape 1</span>
+        <span class="step-name">Cadre</span>
+      </div>
+    </div>
+    <div class="step-tab locked" id="tab-2" onclick="gotoStep(2)">
+      <div class="step-num">2</div>
+      <div class="step-info">
+        <span class="step-label">Étape 2</span>
+        <span class="step-name">Phrases</span>
+      </div>
+    </div>
+    <div class="step-tab locked" id="tab-3" onclick="gotoStep(3)">
+      <div class="step-num">3</div>
+      <div class="step-info">
+        <span class="step-label">Étape 3</span>
+        <span class="step-name">Synthèse</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 1 -->
+  <div id="step-1" class="step-content">
+    <div class="stage-hint">Commence par poser le cadre : ta problématique, les mouvements du texte et ton introduction. Ces trois champs débloqueront l'analyse des phrases.</div>
+    <div class="fields-grid">
+      <div class="field-card">
+        <div class="field-icon">🎯</div>
+        <div class="field-title">Problématique</div>
+        <div class="field-subtitle">La question qui guide ta lecture du texte.</div>
+        <textarea class="form-input" id="problematique" placeholder="En quoi ce texte... ?" oninput="updateProgress()" rows="5"></textarea>
+      </div>
+      <div class="field-card">
+        <div class="field-icon">📐</div>
+        <div class="field-title">Mouvements</div>
+        <div class="field-subtitle">Les mouvements structurels que tu as repérés dans le texte.</div>
+        <textarea class="form-input" id="mouvements" placeholder="I. ...&#10;II. ...&#10;III. ..." oninput="updateProgress()" rows="5"></textarea>
+      </div>
+      <div class="field-card full">
+        <div class="field-icon">🎤</div>
+        <div class="field-title">Introduction</div>
+        <div class="field-subtitle">Auteur, œuvre, contexte, jusqu'à ta problématique.</div>
+        <textarea class="form-input" id="introduction" placeholder="Présentation, situation du texte, problématique, annonce du plan..." oninput="updateProgress()" rows="5"></textarea>
+      </div>
+    </div>
+    <div class="step-footer">
+      <span class="step-footer-hint" id="step1-hint">Remplis problématique, mouvements et introduction pour continuer.</span>
+      <button class="btn btn-primary" onclick="gotoStep(2)">Passer à l'étape 2 →</button>
+    </div>
+  </div>
+
+  <!-- STEP 2 -->
+  <div id="step-2" class="step-content" style="display:none">
+    <div class="phrases-layout">
+      <div class="passage-panel" id="passage-rendered"></div>
+      <div class="analysis-panel">
+        <div class="panel-nav">
+          <span class="panel-phrase-label" id="phrase-counter-label">PHRASE 1 SUR 0</span>
+          <div class="panel-nav-btns">
+            <button onclick="prevPhrase()">‹</button>
+            <button onclick="nextPhrase()">›</button>
+          </div>
+        </div>
+        <div class="panel-phrase-text" id="panel-phrase-text">—</div>
+        <div class="phantom-row">
+          <button class="masquer-btn" id="masquer-btn" onclick="toggleCorrection()">👁️ MASQUER LA CORRECTION</button>
+          <div class="toggle-wrap">
+            <span>MODE FANTÔME</span>
+            <label class="toggle"><input type="checkbox" id="phantom-toggle" onchange="togglePhantom()"><span class="toggle-slider"></span></label>
+          </div>
+        </div>
+        <div id="correction-area">
+          <div class="correction-label">CORRECTION MODÈLE</div>
+          <div class="correction-text" id="correction-text">—</div>
+        </div>
+        <div class="analysis-input-area">
+          <div style="font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text3);margin-bottom:5px;">TON ANALYSE</div>
+          <textarea class="form-input" id="analysis-input" placeholder="Écris ton analyse ici..." rows="3" oninput="saveCurrentAnalysis()"></textarea>
+        </div>
+        <button class="save-next-btn" onclick="nextPhrase()">Enregistrer et suivant</button>
+        <div class="kbd-hint"><kbd>Enter</kbd> pour passer à la suivante</div>
+      </div>
+    </div>
+    <div class="step-footer" style="margin-top:20px;">
+      <button class="btn btn-ghost" onclick="gotoStep(1)">← Étape 1</button>
+      <span id="step2-status" style="font-size:0.82rem;color:var(--text3);">0 phrases analysées</span>
+      <button class="btn btn-primary" onclick="gotoStep(3)">Passer à l'étape 3 →</button>
+    </div>
+  </div>
+
+  <!-- STEP 3 -->
+  <div id="step-3" class="step-content" style="display:none">
+    <div class="stage-hint">Dernière étape : développe chaque partie de ton plan et rédige ta conclusion avec une ouverture.</div>
+    <div id="synthese-mouvements"></div>
+    <div class="synthese-section">
+      <h3>🏁 Conclusion</h3>
+      <div class="synthese-field">
+        <div class="synthese-field-label">BILAN GÉNÉRAL <span class="vide-tag" id="bilan-tag">VIDE</span></div>
+        <textarea class="form-input" id="bilan" placeholder="Réponds à ta problématique..." oninput="updateProgress()" rows="3"></textarea>
+      </div>
+      <div class="synthese-field">
+        <div class="synthese-field-label">OUVERTURE <span class="vide-tag" id="ouverture-tag">VIDE</span></div>
+        <textarea class="form-input" id="ouverture" placeholder="Vers une autre œuvre, une autre question..." oninput="updateProgress()" rows="3"></textarea>
+      </div>
+    </div>
+    <div class="step-footer">
+      <button class="btn btn-ghost" onclick="gotoStep(2)">← Étape 2</button>
+      <span style="font-size:0.82rem;color:var(--green);">✓ Étape 3</span>
+      <button class="btn btn-primary" onclick="showView('library')">Retour à la bibliothèque</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════ SIMULATION OVERLAY ═══════════════════════ -->
+<div class="sim-overlay" id="sim-overlay">
+  <div class="sim-header">
+    <span style="font-size:1.3rem">🎙️</span>
+    <div>
+      <div class="sim-title">Simulation orale</div>
+      <div class="sim-sub" id="sim-sub">— parle sans tes notes</div>
+    </div>
+    <button class="sim-close" onclick="closeSimulation()">✕</button>
+  </div>
+  <div class="sim-body">
+    <div class="sim-timer-box">
+      <div class="sim-clock" id="sim-clock">05:00</div>
+      <div class="timer-progress"><div class="timer-progress-fill" id="timer-bar" style="width:100%"></div></div>
+      <div class="sim-timer-btns">
+        <button class="btn btn-primary" id="sim-start-btn" onclick="toggleTimer()">▶ Démarrer</button>
+        <button class="btn btn-ghost" onclick="resetTimer()">↺ Réinitialiser</button>
+      </div>
+      <div class="sim-duration-btns">
+        <span style="font-size:0.78rem;color:var(--text3);align-self:center;margin-right:4px;">DURÉE</span>
+        <button class="dur-btn selected" onclick="setDuration(5, this)">5 min</button>
+        <button class="dur-btn" onclick="setDuration(8, this)">8 min</button>
+        <button class="dur-btn" onclick="setDuration(10, this)">10 min</button>
+        <button class="dur-btn" onclick="setDuration(12, this)">12 min</button>
+      </div>
+      <div class="sim-hint">Appuie sur <kbd>Espace</kbd> pour démarrer / mettre en pause, <kbd>Échap</kbd> pour quitter</div>
+    </div>
+    <div class="sim-text-box">
+      <div class="sim-text-label">TEXTE AFFICHÉ — TES NOTES SONT CACHÉES</div>
+      <div class="sim-passage" id="sim-passage"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════ ROULETTE MODAL ═══════════════════════ -->
+<div class="modal-overlay" id="roulette-modal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeRoulette()">✕</button>
+    <h2>🔀 Roulette des textes</h2>
+    <p>Laisse le hasard choisir ton prochain texte à travailler.</p>
+    <div class="roulette-box" id="roulette-box">
+      <span class="roulette-hint">Clique sur <strong>Lancer la roue</strong> pour tirer un texte au hasard.</span>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="spinRoulette()">🔀 Lancer la roue</button>
+      <button class="btn btn-primary" id="open-roulette-result" onclick="openRouletteResult()" style="display:none">📖 Ouvrir ce texte</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════
+// DATA
+// ═══════════════════════════════════════════════
+let texts = JSON.parse(localStorage.getItem('revision_texts') || '[]');
+let currentTextId = null;
+let currentStep = 1;
+let currentPhraseIdx = 0;
+let phrases = []; // [{text, correction, analysis}]
+let correctionVisible = true;
+let phantomMode = false;
+let timerInterval = null;
+let timerDuration = 5 * 60;
+let timerRemaining = 5 * 60;
+let timerRunning = false;
+let rouletteResult = null;
+let unlockedSteps = new Set([1]);
+
+function save() {
+  localStorage.setItem('revision_texts', JSON.stringify(texts));
+}
+
+// ═══════════════════════════════════════════════
+// VIEWS
+// ═══════════════════════════════════════════════
+function showView(id) {
+  document.querySelectorAll('.view').forEach(v => { v.classList.remove('active'); if(v.id === 'study') v.style.display='none'; });
+  const el = document.getElementById(id);
+  if(id === 'study') { el.style.display='flex'; el.classList.add('active'); }
+  else { el.classList.add('active'); }
+  if(id === 'library') renderLibrary();
+}
+
+// ═══════════════════════════════════════════════
+// THEME
+// ═══════════════════════════════════════════════
+function toggleTheme() {
+  const html = document.documentElement;
+  const isDark = html.getAttribute('data-theme') === 'dark';
+  html.setAttribute('data-theme', isDark ? 'light' : 'dark');
+  document.getElementById('theme-toggle').textContent = isDark ? '☀️' : '🌙';
+  localStorage.setItem('theme', isDark ? 'light' : 'dark');
+}
+(function(){
+  const t = localStorage.getItem('theme');
+  if(t) { document.documentElement.setAttribute('data-theme', t); document.getElementById('theme-toggle').textContent = t==='light' ? '☀️' : '🌙'; }
+})();
+
+// ═══════════════════════════════════════════════
+// LIBRARY
+// ═══════════════════════════════════════════════
+function renderLibrary() {
+  const grid = document.getElementById('cards-grid');
+  const empty = document.getElementById('empty-state');
+  if(texts.length === 0) { grid.innerHTML = ''; grid.appendChild(empty); return; }
+  grid.innerHTML = '';
+  texts.forEach((t, i) => {
+    const phrases = extractPhrases(t.passage);
+    const filled = phrases.filter(p => p.analysis && p.analysis.trim()).length;
+    const pct = phrases.length ? Math.round(filled / phrases.length * 100) : 0;
+    const preview = phrases.map(p => p.correction || p.text).slice(0,3).join(' | ');
+    const card = document.createElement('div');
+    card.className = 'text-card fade-up';
+    card.style.animationDelay = (i * 0.05) + 's';
+    card.innerHTML = `
+      <h3>${t.title || 'Sans titre'}</h3>
+      <div class="preview">${preview || t.passage.replace(/\[([^\]|]+)(?:\|[^\]]+)?\]/g,'$1').slice(0,120)}...</div>
+      <div class="card-meta">
+        <span>${phrases.length} PHRASES</span>
+        <span>À L'INSTANT</span>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+      <span class="card-open" onclick="openText(${i})">📖 Ouvrir</span>
+    `;
+    grid.appendChild(card);
+  });
+}
+
+// ═══════════════════════════════════════════════
+// PARSE PASSAGE
+// ═══════════════════════════════════════════════
+function extractPhrases(passage) {
+  const results = [];
+  const regex = /\[([^\]]+)\]/g;
+  let m;
+  while((m = regex.exec(passage)) !== null) {
+    const inner = m[1];
+    const parts = inner.split('|');
+    results.push({ text: parts[0].trim(), correction: parts[1] ? parts[1].trim() : '', analysis: '' });
+  }
+  return results;
+}
+
+function renderPassage(passage, phrasesArr, activeIdx) {
+  let html = passage;
+  let idx = 0;
+  html = html.replace(/\[([^\]]+)\]/g, (match, inner) => {
+    const parts = inner.split('|');
+    const txt = parts[0].trim();
+    const cls = idx === activeIdx ? 'phrase-highlight active' : 'phrase-highlight';
+    const i = idx;
+    idx++;
+    return `<span class="${cls}" data-idx="${i}" onclick="selectPhrase(${i})">${txt}</span>`;
+  });
+  // paragraph breaks
+  html = html.split(/\n\n+/).map(p => `<p style="margin-bottom:1.1em">${p.replace(/\n/g,'<br>')}</p>`).join('');
+  return html;
+}
+
+// ═══════════════════════════════════════════════
+// NEW TEXT
+// ═══════════════════════════════════════════════
+function updateStats() {
+  const val = document.getElementById('passage-input').value;
+  const words = val.trim() ? val.trim().split(/\s+/).length : 0;
+  const matches = val.match(/\[[^\]]+\]/g) || [];
+  document.getElementById('word-count').textContent = words;
+  document.getElementById('phrase-count').textContent = matches.length;
+}
+
+function saveAndStudy() {
+  const title = document.getElementById('text-title-input').value.trim();
+  const passage = document.getElementById('passage-input').value.trim();
+  if(!title || !passage) { alert('Remplis le titre et le passage !'); return; }
+  const id = Date.now();
+  const newText = { id, title, passage, problematique:'', mouvements:'', introduction:'', bilan:'', ouverture:'', synthese:[], phraseAnalyses:[] };
+  if(currentTextId !== null && currentTextId !== 'new') {
+    const idx = texts.findIndex(t => t.id === currentTextId);
+    if(idx>=0) { texts[idx] = {...texts[idx], title, passage}; save(); openText(idx); return; }
+  }
+  texts.push(newText);
+  save();
+  openText(texts.length - 1);
+}
+
+// ═══════════════════════════════════════════════
+// OPEN / STUDY
+// ═══════════════════════════════════════════════
+function openText(idx) {
+  currentTextId = texts[idx].id;
+  const t = texts[idx];
+  phrases = extractPhrases(t.passage);
+  // restore saved analyses
+  if(t.phraseAnalyses) phrases.forEach((p,i) => { if(t.phraseAnalyses[i]) p.analysis = t.phraseAnalyses[i]; });
+  currentPhraseIdx = 0;
+  unlockedSteps = new Set([1]);
+
+  // populate step 1
+  document.getElementById('study-title-display').textContent = t.title;
+  document.getElementById('problematique').value = t.problematique || '';
+  document.getElementById('mouvements').value = t.mouvements || '';
+  document.getElementById('introduction').value = t.introduction || '';
+
+  // build synthese fields from mouvements
+  buildSyntheseFields(t);
+
+  updateProgress();
+  showView('study');
+  gotoStep(1);
+}
+
+function buildSyntheseFields(t) {
+  const movs = (t.mouvements || '').split('\n').filter(l => l.trim());
+  const container = document.getElementById('synthese-mouvements');
+  container.innerHTML = '';
+  const saved = t.synthese || [];
+  movs.forEach((mov, i) => {
+    const s = saved[i] || {};
+    const div = document.createElement('div');
+    div.className = 'synthese-section';
+    div.innerHTML = `
+      <h3>📐 ${mov || 'Mouvement '+(i+1)}</h3>
+      <div class="synthese-field">
+        <div class="synthese-field-label">ANALYSE <span class="${s.analyse ? 'filled-tag' : 'vide-tag'}" id="stag-a-${i}">${s.analyse ? '✓' : 'VIDE'}</span></div>
+        <textarea class="form-input" id="s-analyse-${i}" placeholder="Analyse détaillée..." rows="3" oninput="updateSynthese(${i})">${s.analyse||''}</textarea>
+      </div>
+      <div class="synthese-field">
+        <div class="synthese-field-label">MINI-CONCLUSION <span class="${s.miniconclusion ? 'filled-tag' : 'vide-tag'}" id="stag-mc-${i}">${s.miniconclusion ? '✓' : 'VIDE'}</span></div>
+        <textarea class="form-input" id="s-mc-${i}" placeholder="Bilan de la partie..." rows="2" oninput="updateSynthese(${i})">${s.miniconclusion||''}</textarea>
+      </div>
+      <div class="synthese-field">
+        <div class="synthese-field-label">TRANSITION <span class="${s.transition ? 'filled-tag' : 'vide-tag'}" id="stag-tr-${i}">${s.transition ? '✓' : 'VIDE'}</span></div>
+        <textarea class="form-input" id="s-tr-${i}" placeholder="Vers la partie suivante..." rows="2" oninput="updateSynthese(${i})">${s.transition||''}</textarea>
+      </div>
+    `;
+    container.appendChild(div);
+  });
+  // restore bilan/ouverture
+  document.getElementById('bilan').value = t.bilan || '';
+  document.getElementById('ouverture').value = t.ouverture || '';
+}
+
+function updateSynthese(i) {
+  const t = texts.find(x => x.id === currentTextId);
+  if(!t) return;
+  if(!t.synthese) t.synthese = [];
+  if(!t.synthese[i]) t.synthese[i] = {};
+  t.synthese[i].analyse = document.getElementById(`s-analyse-${i}`)?.value || '';
+  t.synthese[i].miniconclusion = document.getElementById(`s-mc-${i}`)?.value || '';
+  t.synthese[i].transition = document.getElementById(`s-tr-${i}`)?.value || '';
+  ['a','mc','tr'].forEach(k => {
+    const el = document.getElementById(`stag-${k}-${i}`);
+    const val = k==='a' ? t.synthese[i].analyse : k==='mc' ? t.synthese[i].miniconclusion : t.synthese[i].transition;
+    if(el) { el.textContent = val ? '✓' : 'VIDE'; el.className = val ? 'filled-tag' : 'vide-tag'; }
+  });
+  save();
+  updateProgress();
+}
+
+// ═══════════════════════════════════════════════
+// STEPS
+// ═══════════════════════════════════════════════
+function gotoStep(n) {
+  if(n > 1 && !unlockedSteps.has(n)) { unlockStep(n); }
+  currentStep = n;
+  [1,2,3].forEach(i => {
+    const tab = document.getElementById(`tab-${i}`);
+    const content = document.getElementById(`step-${i}`);
+    content.style.display = i === n ? 'block' : 'none';
+    tab.classList.remove('active','done','locked');
+    if(i < n) tab.classList.add('done');
+    else if(i === n) tab.classList.add('active');
+    else if(!unlockedSteps.has(i)) tab.classList.add('locked');
+  });
+  if(n === 2) renderPhraseStep();
+}
+
+function unlockStep(n) {
+  unlockedSteps.add(n);
+}
+
+function renderPhraseStep() {
+  const t = texts.find(x => x.id === currentTextId);
+  if(!t) return;
+  const panel = document.getElementById('passage-rendered');
+  panel.innerHTML = renderPassage(t.passage, phrases, currentPhraseIdx);
+  selectPhrase(currentPhraseIdx);
+}
+
+function selectPhrase(idx) {
+  saveCurrentAnalysis();
+  currentPhraseIdx = idx;
+  // update highlights
+  document.querySelectorAll('.phrase-highlight').forEach(el => {
+    el.classList.toggle('active', parseInt(el.dataset.idx) === idx);
+  });
+  const p = phrases[idx];
+  if(!p) return;
+  document.getElementById('phrase-counter-label').textContent = `PHRASE ${idx+1} SUR ${phrases.length}`;
+  document.getElementById('panel-phrase-text').textContent = `"${p.text}"`;
+  document.getElementById('correction-text').textContent = p.correction || '(pas de correction modèle)';
+  document.getElementById('analysis-input').value = p.analysis || '';
+  document.getElementById('step2-status').textContent = `${phrases.filter(x => x.analysis?.trim()).length}/${phrases.length} phrases analysées`;
+
+  // phantom mode
+  if(phantomMode) {
+    document.getElementById('correction-area').style.opacity = '0';
+  } else {
+    document.getElementById('correction-area').style.opacity = correctionVisible ? '1' : '0';
+  }
+  document.getElementById('masquer-btn').textContent = correctionVisible ? '👁️ MASQUER LA CORRECTION' : '👁️ AFFICHER LA CORRECTION';
+  updateProgress();
+}
+
+function saveCurrentAnalysis() {
+  const input = document.getElementById('analysis-input');
+  if(!input || !phrases[currentPhraseIdx]) return;
+  phrases[currentPhraseIdx].analysis = input.value;
+  const t = texts.find(x => x.id === currentTextId);
+  if(t) { t.phraseAnalyses = phrases.map(p => p.analysis); save(); }
+}
+
+function prevPhrase() { if(currentPhraseIdx > 0) { saveCurrentAnalysis(); selectPhrase(currentPhraseIdx-1); } }
+function nextPhrase() { saveCurrentAnalysis(); if(currentPhraseIdx < phrases.length-1) selectPhrase(currentPhraseIdx+1); }
+
+function toggleCorrection() {
+  correctionVisible = !correctionVisible;
+  document.getElementById('correction-area').style.opacity = correctionVisible ? '1' : '0';
+  document.getElementById('masquer-btn').textContent = correctionVisible ? '👁️ MASQUER LA CORRECTION' : '👁️ AFFICHER LA CORRECTION';
+}
+
+function togglePhantom() {
+  phantomMode = document.getElementById('phantom-toggle').checked;
+  document.getElementById('correction-area').style.opacity = phantomMode ? '0' : (correctionVisible ? '1' : '0');
+}
+
+// ═══════════════════════════════════════════════
+// PROGRESS
+// ═══════════════════════════════════════════════
+function updateProgress() {
+  const t = texts.find(x => x.id === currentTextId);
+  if(!t) return;
+  // save step1
+  t.problematique = document.getElementById('problematique')?.value || '';
+  t.mouvements = document.getElementById('mouvements')?.value || '';
+  t.introduction = document.getElementById('introduction')?.value || '';
+  t.bilan = document.getElementById('bilan')?.value || '';
+  t.ouverture = document.getElementById('ouverture')?.value || '';
+  save();
+
+  const step1Fields = [t.problematique, t.mouvements, t.introduction].filter(f => f.trim()).length;
+  const analysedPhrases = phrases.filter(p => p.analysis?.trim()).length;
+  const movCount = (t.mouvements || '').split('\n').filter(l => l.trim()).length;
+  const syntheseFields = (t.synthese || []).flatMap(s => [s.analyse, s.miniconclusion, s.transition]).filter(f => f?.trim()).length;
+  const totalSyntheseFields = movCount * 3 + 2; // +2 bilan & ouverture
+  const bilanFilled = (t.bilan?.trim() ? 1 : 0) + (t.ouverture?.trim() ? 1 : 0);
+
+  const total = 3 + phrases.length + totalSyntheseFields;
+  const done = step1Fields + analysedPhrases + syntheseFields + bilanFilled;
+  const pct = total > 0 ? Math.round(done/total*100) : 0;
+
+  document.getElementById('study-pct').textContent = pct + '%';
+  document.getElementById('study-bar-fill').style.width = pct + '%';
+
+  const wordsWritten = [t.problematique, t.introduction, ...phrases.map(p=>p.analysis||''), ...(t.synthese||[]).flatMap(s=>[s.analyse||'',s.miniconclusion||'',s.transition||'']), t.bilan||'', t.ouverture||''].join(' ').trim().split(/\s+/).filter(Boolean).length;
+  document.getElementById('study-meta').textContent = `${analysedPhrases}/${phrases.length} phrases · ${step1Fields}/3 champs du plan · ${wordsWritten} mots écrits`;
+
+  // hint step1
+  const hint = document.getElementById('step1-hint');
+  if(hint) {
+    if(step1Fields === 3) { hint.textContent = '✓ Prêt à analyser les phrases !'; hint.style.color = 'var(--green)'; }
+    else { hint.textContent = 'Remplis problématique, mouvements et introduction pour continuer.'; hint.style.color = ''; }
+  }
+
+  // update synthese tags
+  if(t.bilan !== undefined) {
+    const bt = document.getElementById('bilan-tag'); if(bt) { bt.textContent = t.bilan.trim() ? '✓' : 'VIDE'; bt.className = t.bilan.trim() ? 'filled-tag' : 'vide-tag'; }
+    const ot = document.getElementById('ouverture-tag'); if(ot) { ot.textContent = t.ouverture.trim() ? '✓' : 'VIDE'; ot.className = t.ouverture.trim() ? 'filled-tag' : 'vide-tag'; }
+  }
+}
+
+// ═══════════════════════════════════════════════
+// CHECK OUBLIS
+// ═══════════════════════════════════════════════
+function checkOublis() {
+  const empty = phrases.map((p, i) => p.analysis?.trim() ? null : i+1).filter(Boolean);
+  if(empty.length === 0) alert('✓ Toutes les phrases ont été analysées !');
+  else alert(`Phrases non analysées : ${empty.join(', ')}`);
+}
+
+// ═══════════════════════════════════════════════
+// EXPORT
+// ═══════════════════════════════════════════════
+function exportText() {
+  const t = texts.find(x => x.id === currentTextId);
+  if(!t) return;
+  let out = `# ${t.title}\n\n## Cadre\n**Problématique :** ${t.problematique}\n**Mouvements :**\n${t.mouvements}\n\n**Introduction :** ${t.introduction}\n\n## Phrases clés\n`;
+  phrases.forEach((p, i) => { out += `\n${i+1}. "${p.text}"\n   Analyse : ${p.analysis || '—'}\n   Correction : ${p.correction || '—'}\n`; });
+  out += `\n## Conclusion\n${t.bilan}\nOuverture : ${t.ouverture}`;
+  const blob = new Blob([out], {type:'text/plain;charset=utf-8'});
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = (t.title || 'texte') + '.txt'; a.click();
+}
+
+// ═══════════════════════════════════════════════
+// SIMULATION
+// ═══════════════════════════════════════════════
+function openSimulation() {
+  const t = texts.find(x => x.id === currentTextId);
+  if(!t) return;
+  document.getElementById('sim-sub').textContent = (t.title || '—') + ' — parle sans tes notes';
+  // render passage with highlights but no notes
+  const simPassage = document.getElementById('sim-passage');
+  simPassage.innerHTML = renderPassage(t.passage, phrases, -1);
+  document.getElementById('sim-overlay').classList.add('open');
+  resetTimer();
+}
+
+function closeSimulation() {
+  document.getElementById('sim-overlay').classList.remove('open');
+  clearInterval(timerInterval); timerRunning = false;
+  document.getElementById('sim-start-btn').textContent = '▶ Démarrer';
+}
+
+function setDuration(mins, btn) {
+  timerDuration = mins * 60; timerRemaining = timerDuration;
+  document.querySelectorAll('.dur-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  updateClock();
+}
+
+function toggleTimer() {
+  if(timerRunning) { clearInterval(timerInterval); timerRunning = false; document.getElementById('sim-start-btn').textContent = '▶ Démarrer'; }
+  else { timerRunning = true; document.getElementById('sim-start-btn').textContent = '⏸ Pause'; timerInterval = setInterval(tickTimer, 1000); }
+}
+
+function tickTimer() {
+  if(timerRemaining <= 0) { clearInterval(timerInterval); timerRunning = false; document.getElementById('sim-start-btn').textContent = '▶ Démarrer'; return; }
+  timerRemaining--;
+  updateClock();
+}
+
+function resetTimer() {
+  clearInterval(timerInterval); timerRunning = false;
+  timerRemaining = timerDuration;
+  document.getElementById('sim-start-btn').textContent = '▶ Démarrer';
+  updateClock();
+}
+
+function updateClock() {
+  const m = Math.floor(timerRemaining/60).toString().padStart(2,'0');
+  const s = (timerRemaining%60).toString().padStart(2,'0');
+  const clock = document.getElementById('sim-clock');
+  clock.textContent = `${m}:${s}`;
+  clock.className = 'sim-clock' + (timerRemaining < 60 ? ' danger' : timerRemaining < timerDuration*0.25 ? ' warning' : '');
+  document.getElementById('timer-bar').style.width = (timerRemaining/timerDuration*100) + '%';
+}
+
+// ═══════════════════════════════════════════════
+// ROULETTE
+// ═══════════════════════════════════════════════
+function openRoulette() { rouletteResult = null; document.getElementById('roulette-box').innerHTML = '<span class="roulette-hint">Clique sur <strong>Lancer la roue</strong> pour tirer un texte au hasard.</span>'; document.getElementById('open-roulette-result').style.display='none'; document.getElementById('roulette-modal').classList.add('open'); }
+function closeRoulette() { document.getElementById('roulette-modal').classList.remove('open'); }
+
+function spinRoulette() {
+  if(texts.length === 0) { document.getElementById('roulette-box').innerHTML = '<span class="roulette-hint">Aucun texte dans la bibliothèque !</span>'; return; }
+  const box = document.getElementById('roulette-box');
+  box.innerHTML = '<span class="spinning" style="font-size:1.5rem">🔀</span>';
+  setTimeout(() => {
+    rouletteResult = Math.floor(Math.random() * texts.length);
+    box.innerHTML = `<span class="roulette-result">📖 ${texts[rouletteResult].title}</span>`;
+    document.getElementById('open-roulette-result').style.display='inline-flex';
+  }, 700);
+}
+
+function openRouletteResult() {
+  if(rouletteResult === null) return;
+  closeRoulette(); openText(rouletteResult);
+}
+
+// ═══════════════════════════════════════════════
+// KEYBOARD
+// ═══════════════════════════════════════════════
+document.addEventListener('keydown', e => {
+  if(document.getElementById('sim-overlay').classList.contains('open')) {
+    if(e.code === 'Space') { e.preventDefault(); toggleTimer(); }
+    if(e.code === 'Escape') closeSimulation();
+    return;
+  }
+  if(e.code === 'Escape' && document.getElementById('roulette-modal').classList.contains('open')) { closeRoulette(); }
+  if(currentStep === 2 && e.code === 'Enter' && !e.shiftKey && document.activeElement.id === 'analysis-input') { e.preventDefault(); nextPhrase(); }
+});
+
+// ═══════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════
+renderLibrary();
+</script>
+</body>
+</html>
