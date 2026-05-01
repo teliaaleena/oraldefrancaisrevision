@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Révision Oral</title>
+
+<style>
+body { font-family: Arial; background:#f5f7fb; padding:20px; }
+
+.card {
+  background:white; border-radius:20px; padding:15px;
+  margin:10px 0; box-shadow:0 4px 10px rgba(0,0,0,0.08);
+  cursor:pointer;
+}
+
+.highlight {
+  background:#e0ebff; color:#3366ff;
+  padding:3px 6px; border-radius:8px; cursor:pointer;
+}
+
+textarea {
+  width:100%; border-radius:10px; padding:10px; margin:5px 0;
+}
+
+button {
+  margin:5px; padding:8px 12px;
+  border:none; border-radius:10px;
+  background:#4f6cff; color:white; cursor:pointer;
+}
+
+.correct { background:#4CAF50; }
+.wrong { background:#FF9800; }
+
+</style>
+</head>
+
+<body>
+
+<h2>🎓 Révision Oral</h2>
+
+<!-- LIBRARY -->
+<div id="library">
+
+<h3>📚 Mes textes</h3>
+<div id="textList"></div>
+
+<button onclick="randomText()">🎲 Texte aléatoire</button>
+<button onclick="startHardMode()">🔥 Parties difficiles</button>
+
+<h3>Ajouter un texte</h3>
+<input id="title" placeholder="Titre"><br><br>
+<textarea id="inputText" placeholder="[élément | correction]"></textarea>
+<button onclick="saveText()">Enregistrer</button>
+
+</div>
+
+<!-- GAME -->
+<div id="game" style="display:none;">
+
+<button onclick="goBack()">⬅ Retour</button>
+
+<h3 id="textTitle"></h3>
+
+<div style="background:#ddd;border-radius:10px;">
+<div id="bar" style="height:10px;width:0%;background:#4f6cff;"></div>
+</div>
+
+<p id="progressText">Progression : 0%</p>
+
+<div id="step1">
+<h3>🧠 Problématique</h3>
+<textarea id="problem"></textarea>
+<button onclick="markSelf('problem')">Voir correction</button>
+
+<h3>🎤 Introduction</h3>
+<textarea id="intro"></textarea>
+
+<h3>Annonce du plan</h3>
+<textarea id="plan"></textarea>
+
+<button onclick="nextStep()">Continuer</button>
+</div>
+
+<div id="step2" style="display:none;">
+<p id="textDisplay"></p>
+
+<textarea id="answerBox" placeholder="Analyse..."></textarea>
+<button onclick="toggleCorrection()">📖 Voir correction</button>
+
+<br>
+<button class="correct" onclick="markCorrect()">✅ Correct</button>
+<button class="wrong" onclick="markWrong()">🔁 À revoir</button>
+
+<button onclick="nextStep()">Continuer</button>
+</div>
+
+<div id="step3" style="display:none;">
+
+<h3>Mouvement 1</h3>
+<textarea placeholder="Mini conclusion"></textarea>
+<textarea placeholder="Transition"></textarea>
+
+<h3>Mouvement 2</h3>
+<textarea></textarea>
+<textarea></textarea>
+
+<h3>Mouvement 3</h3>
+<textarea></textarea>
+<textarea></textarea>
+
+<h3>🏁 Conclusion</h3>
+<textarea id="conclusion"></textarea>
+
+<h3>Ouverture</h3>
+<textarea id="ouverture"></textarea>
+
+<button onclick="finish()">Terminer</button>
+</div>
+
+</div>
+
+<script>
+
+let texts = JSON.parse(localStorage.getItem("texts")) || [];
+let answers = {};
+let modelAnswers = {};
+let difficultParts = JSON.parse(localStorage.getItem("difficult")) || [];
+let current = null;
+let step = 1;
+
+// SAVE TEXT
+function saveText(){
+let t = document.getElementById("title").value;
+let c = document.getElementById("inputText").value;
+
+texts.push({title:t, content:c});
+localStorage.setItem("texts", JSON.stringify(texts));
+displayTexts();
+}
+
+// DISPLAY
+function displayTexts(){
+let list="";
+texts.forEach((t,i)=>{
+list+=`<div class="card" onclick="loadText(${i})">${t.title}</div>`;
+});
+document.getElementById("textList").innerHTML=list;
+}
+
+// LOAD TEXT
+function loadText(i){
+
+let txt=texts[i];
+answers={}; modelAnswers={};
+
+let parts=txt.content.split(/\[(.*?)\]/);
+let display=""; let count=0;
+
+for(let i=0;i<parts.length;i++){
+if(i%2==1){
+let split=parts[i].split("|");
+let q=split[0].trim();
+let m=split[1]?split[1].trim():"";
+
+let id="p"+count;
+
+display+=`<span class="highlight" onclick="selectPart('${id}')">${q}</span>`;
+answers[id]="";
+modelAnswers[id]=m;
+count++;
+}else display+=parts[i];
+}
+
+document.getElementById("textDisplay").innerHTML=display;
+document.getElementById("textTitle").innerText=txt.title;
+
+document.getElementById("library").style.display="none";
+document.getElementById("game").style.display="block";
+step=1; updateStep();
+}
+
+// SELECT PART
+function selectPart(id){
+if(step!==2){alert("Fais d'abord l'introduction");return;}
+current=id;
+}
+
+// CORRECTION
+function toggleCorrection(){
+if(!current)return;
+alert("Correction: "+modelAnswers[current]);
+}
+
+// SELF MARK
+function markCorrect(){
+if(!current)return;
+updateProgress();
+}
+
+function markWrong(){
+if(!current)return;
+difficultParts.push(current);
+localStorage.setItem("difficult", JSON.stringify(difficultParts));
+}
+
+// HARD MODE
+function startHardMode(){
+alert("Mode parties difficiles !");
+}
+
+// RANDOM TEXT
+function randomText(){
+let i=Math.floor(Math.random()*texts.length);
+loadText(i);
+}
+
+// STEPS
+function nextStep(){
+if(step==1){
+let p=document.getElementById("problem").value;
+let i=document.getElementById("intro").value;
+let pl=document.getElementById("plan").value;
+
+if(!p||!i||!pl){
+alert("Complète l'intro !");
+return;
+}
+step=2;
+}
+else if(step==2){
+step=3;
+}
+updateStep();
+}
+
+function updateStep(){
+document.getElementById("step1").style.display=step==1?"block":"none";
+document.getElementById("step2").style.display=step==2?"block":"none";
+document.getElementById("step3").style.display=step==3?"block":"none";
+}
+
+// PROGRESS
+function updateProgress(){
+let percent=Math.floor(Math.random()*100);
+document.getElementById("bar").style.width=percent+"%";
+document.getElementById("progressText").innerText="Progression : "+percent+"%";
+}
+
+// FINISH
+function finish(){
+let c=document.getElementById("conclusion").value;
+let o=document.getElementById("ouverture").value;
+
+if(!c||!o){
+alert("Ajoute conclusion !");
+return;
+}
+alert("🔥 Prêt pour l'oral !");
+}
+
+// BACK
+function goBack(){
+location.reload();
+}
+
+displayTexts();
+
+</script>
+
+</body>
+</html>

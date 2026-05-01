@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Révision Oral</title>
+</head>
+
+<body>
+
+<h2>🎓 Révision Oral</h2>
+
+<!-- BIBLIOTHÈQUE -->
+<div id="library">
+  <h3>📚 Mes textes</h3>
+  <div id="textList"></div>
+
+  <h3>Ajouter un texte</h3>
+  <input id="title" placeholder="Titre"><br><br>
+  <textarea id="inputText" placeholder="Utilise [ ] pour les éléments à analyser"></textarea>
+  <button onclick="saveText()">Enregistrer</button>
+</div>
+
+<!-- JEU -->
+<div id="game" style="display:none;">
+
+  <button onclick="goBack()">⬅ Retour</button>
+
+  <h3 id="textTitle"></h3>
+
+  <!-- PROGRESSION -->
+  <div style="background:#ddd; border-radius:10px;">
+    <div id="bar" style="height:10px; width:0%; background:#4f6cff;"></div>
+  </div>
+  <p id="progressText">Progression : 0%</p>
+
+  <p id="textDisplay"></p>
+  <textarea id="answerBox" placeholder="Analyse ici..."></textarea>
+
+  <h3>🧠 Problématique</h3>
+  <textarea id="problem"></textarea>
+
+  <h3>📊 Mouvements du texte</h3>
+  <textarea id="movements"></textarea>
+
+  <h3>🎤 Introduction</h3>
+  <textarea id="intro"></textarea>
+
+  <h4>Annonce du plan</h4>
+  <textarea id="plan"></textarea>
+
+  <h3>Mouvement 1</h3>
+  <textarea id="m1intro" placeholder="Introduction de partie"></textarea>
+  <textarea id="m1analysis" placeholder="Analyse"></textarea>
+  <textarea id="m1transition" placeholder="Transition"></textarea>
+
+  <h3>Mouvement 2</h3>
+  <textarea id="m2intro"></textarea>
+  <textarea id="m2analysis"></textarea>
+  <textarea id="m2transition"></textarea>
+
+  <h3>Mouvement 3</h3>
+  <textarea id="m3intro"></textarea>
+  <textarea id="m3analysis"></textarea>
+  <textarea id="m3transition"></textarea>
+
+  <h3>🏁 Conclusion</h3>
+  <textarea id="conclusion"></textarea>
+
+  <h4>Ouverture</h4>
+  <textarea id="ouverture"></textarea>
+
+  <button onclick="checkMissing()">Vérifier les oublis</button>
+  <button onclick="startOral()">🎤 Simulation orale</button>
+
+</div>
+
+<script>
+let texts = [];
+let answers = {};
+let current = null;
+let total = 0;
+let completed = 0;
+
+// SAVE TEXT
+function saveText() {
+  let title = document.getElementById("title").value;
+  let content = document.getElementById("inputText").value;
+
+  texts.push({ title, content });
+  displayTexts();
+}
+
+// DISPLAY LIBRARY
+function displayTexts() {
+  let list = document.getElementById("textList");
+  list.innerHTML = "";
+
+  texts.forEach((t, i) => {
+    list.innerHTML += `<div class="card" onclick="loadText(${i})">${t.title}</div>`;
+  });
+}
+
+// LOAD TEXT
+function loadText(index) {
+  let textObj = texts[index];
+  total = 0;
+  completed = 0;
+  answers = {};
+
+  let parts = textObj.content.split(/\[(.*?)\]/);
+  let display = "";
+
+  for (let i = 0; i < parts.length; i++) {
+    if (i % 2 === 1) {
+      let id = "p" + total;
+      display += `<span class="highlight" onclick="selectPart('${id}')">${parts[i]}</span>`;
+      answers[id] = "";
+      total++;
+    } else {
+      display += parts[i];
+    }
+  }
+
+  total += 12;
+
+  document.getElementById("textDisplay").innerHTML = display;
+  document.getElementById("textTitle").innerText = textObj.title;
+
+  document.getElementById("library").style.display = "none";
+  document.getElementById("game").style.display = "block";
+}
+
+// SELECT PART
+function selectPart(id) {
+  current = id;
+  document.getElementById("answerBox").value = answers[id];
+}
+
+// WRITE ANALYSIS
+document.getElementById("answerBox").addEventListener("input", function() {
+  if (current) {
+    if (answers[current] === "" && this.value !== "") completed++;
+    answers[current] = this.value;
+    updateProgress();
+  }
+});
+
+// UPDATE PROGRESS
+function updateProgress() {
+  let extra = 0;
+
+  document.querySelectorAll("#game textarea").forEach(t => {
+    if (t.id !== "answerBox" && t.value !== "") extra++;
+  });
+
+  let percent = Math.round(((completed + extra) / total) * 100);
+
+  document.getElementById("bar").style.width = percent + "%";
+  document.getElementById("progressText").innerText = "Progression : " + percent + "%";
+
+  // encouragement messages
+  if (percent === 100) alert("🔥 Parfait ! Tu es prêt(e) pour l’oral !");
+}
+
+// CHECK MISSING
+function checkMissing() {
+  let missing = [];
+
+  for (let key in answers) {
+    if (answers[key] === "") missing.push("Analyse");
+  }
+
+  document.querySelectorAll("#game textarea").forEach(t => {
+    if (t.value === "") missing.push(t.previousElementSibling?.innerText || t.id);
+  });
+
+  if (missing.length === 0) {
+    alert("✅ Tout est complété !");
+  } else {
+    alert("❌ Il manque : " + missing.slice(0,5).join(", ") + "...");
+  }
+}
+
+// ORAL SIMULATION
+function startOral() {
+  alert("🎤 Simulation lancée ! Tu as 5 minutes. Parle sans regarder tes notes !");
+  
+  document.querySelectorAll("#game textarea").forEach(t => {
+    t.style.display = "none";
+  });
+
+  let time = 300;
+  let interval = setInterval(() => {
+    time--;
+    if (time <= 0) {
+      clearInterval(interval);
+      alert("⏱ Temps écoulé !");
+    }
+  }, 1000);
+}
+
+// BACK
+function goBack() {
+  location.reload();
+}
+</script>
+
+</body>
+</html>
